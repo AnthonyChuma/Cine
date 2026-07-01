@@ -44,11 +44,38 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                    "/",
+                    "/index.html",
+                    "/favicon.ico",
+                    "/assets/**",
+                    "/**/*.js",
+                    "/**/*.css",
+                    "/**/*.png",
+                    "/**/*.jpg",
+                    "/**/*.jpeg",
+                    "/**/*.svg",
+                    "/**/*.ico",
+                    "/**/*.woff",
+                    "/**/*.woff2",
+                    "/login",
+                    "/registro",
+                    "/cartelera",
+                    "/pelicula/**",
+                    "/mis-tickets",
+                    "/checkout",
+                    "/perfil",
+                    "/no-autorizado",
+                    "/admin/**",
+                    "/caja/**",
                     "/api/auth/**",
                     "/api/public/**",
                     "/actuator/health"
                 ).permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/cajero/**").hasAnyRole("CAJERO", "ADMIN")
+                .requestMatchers("/api/cliente/**").hasAnyRole("CLIENTE", "CAJERO", "ADMIN")
+                .requestMatchers("/api/**").authenticated()
+                .anyRequest().permitAll()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
