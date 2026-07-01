@@ -30,8 +30,8 @@ set PGDATABASE=railway
 set PGUSER=postgres
 set PGPASSWORD=TU_PASSWORD_RAILWAY
 set JWT_SECRET=clave_segura_local_123456789_para_pruebas_cine_hispano_2026
-set FRONTEND_URL=http://localhost:4200
-set DASHBOARD_URL=http://localhost:4300
+set FRONTEND_URL=http://localhost:8080
+set DASHBOARD_URL=http://localhost:8080
 set SPRING_PROFILES_ACTIVE=dev
 ```
 
