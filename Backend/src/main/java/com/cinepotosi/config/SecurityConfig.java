@@ -1,101 +1,44 @@
-package com.cinepotosi.config;
-
-import com.cinepotosi.security.JwtAuthenticationFilter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+@Bean
+@Order(1)
+public SecurityFilterChain apiSecurityFilterChain(
+        HttpSecurity http,
+        JwtAuthenticationFilter jwtAuthenticationFilter
+) throws Exception {
 
-import java.util.List;
+    http
+        .securityMatcher("/api/**")
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/public/**").permitAll()
+            .requestMatchers("/api/auth/**").permitAll()
 
-@Configuration
-@EnableWebSecurity
-@EnableMethodSecurity
-@RequiredArgsConstructor
-public class SecurityConfig {
+            .requestMatchers("/api/admin/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+            .requestMatchers("/api/cajero/**").hasAnyAuthority("CAJERO", "ADMIN", "ROLE_CAJERO", "ROLE_ADMIN")
+            .requestMatchers("/api/cliente/**").hasAnyAuthority("CLIENTE", "CAJERO", "ADMIN", "ROLE_CLIENTE", "ROLE_CAJERO", "ROLE_ADMIN")
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final AuthenticationProvider authenticationProvider;
+            .anyRequest().authenticated()
+        )
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-    @Value("${FRONTEND_URL:http://localhost:4200}")
-    private String frontendUrl;
+    return http.build();
+}
 
-    @Value("${DASHBOARD_URL:http://localhost:4300}")
-    private String dashboardUrl;
+@Bean
+@Order(2)
+public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/",
-                    "/index.html",
-                    "/favicon.ico",
-                    "/assets/**",
-                    "/**/*.js",
-                    "/**/*.css",
-                    "/**/*.png",
-                    "/**/*.jpg",
-                    "/**/*.jpeg",
-                    "/**/*.svg",
-                    "/**/*.ico",
-                    "/**/*.woff",
-                    "/**/*.woff2",
-                    "/login",
-                    "/registro",
-                    "/cartelera",
-                    "/pelicula/**",
-                    "/mis-tickets",
-                    "/checkout",
-                    "/perfil",
-                    "/no-autorizado",
-                    "/admin/**",
-                    "/caja/**",
-                    "/api/auth/**",
-                    "/api/public/**",
-                    "/actuator/health"
-                ).permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/cajero/**").hasAnyRole("CAJERO", "ADMIN")
-                .requestMatchers("/api/cliente/**").hasAnyRole("CLIENTE", "CAJERO", "ADMIN")
-                .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll()
-            )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    http
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            .anyRequest().permitAll()
+        );
 
-        return http.build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(frontendUrl, dashboardUrl, "http://localhost:4200", "http://localhost:4300"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+    return http.build();
 }
