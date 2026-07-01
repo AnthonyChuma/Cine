@@ -1,0 +1,15 @@
+<% const content = `
+  <section class="dashboard-hero">
+    <div>
+      <span class="eyebrow">Panel de caja</span>
+      <h1>Operaciones de venta presencial</h1>
+      <p>Registra ventas rápidas y valida tickets emitidos para las funciones del día.</p>
+    </div>
+    <a class="btn btn-primary" href="/caja/venta">Nueva venta</a>
+  </section>
+  <section class="cards admin-actions">
+    <a class="card action-card" href="/caja/venta"><span>💳</span><h3>Venta presencial</h3><p>Registra tickets para clientes que compran en boletería.</p></a>
+    <a class="card action-card" href="/caja/validar-ticket"><span>✅</span><h3>Validar ticket</h3><p>Comprueba el código único de un ticket presentado.</p></a>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

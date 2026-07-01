@@ -1,0 +1,40 @@
+<% const content = `
+  <section class="hero hero-cinema">
+    <div class="hero-copy">
+      <span class="eyebrow">Cine Hispano Potosí</span>
+      <h1>Compra tus tickets de cine en una sola plataforma.</h1>
+      <p>Consulta la cartelera, elige tu función y accede a una experiencia rápida, segura y organizada.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/cartelera">Ver cartelera</a>
+        <a class="btn btn-secondary" href="/login">Ingresar</a>
+      </div>
+    </div>
+    <div class="hero-poster" aria-hidden="true">
+      <div class="poster-card">
+        <span class="poster-badge">ESTRENO</span>
+        <div class="poster-icon">🍿</div>
+        <h3>Funciones disponibles</h3>
+        <p>Horarios, salas y tickets listos para comprar.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="feature-grid">
+    <article class="feature-card">
+      <span class="feature-icon">🎞️</span>
+      <h3>Cartelera en vivo</h3>
+      <p>Revisa películas activas, géneros, clasificación y próximos horarios.</p>
+    </article>
+    <article class="feature-card">
+      <span class="feature-icon">🎟️</span>
+      <h3>Compra rápida</h3>
+      <p>Selecciona una función y registra tu ticket en pocos pasos.</p>
+    </article>
+    <article class="feature-card">
+      <span class="feature-icon">📊</span>
+      <h3>Gestión completa</h3>
+      <p>Administra películas, funciones, usuarios y reportes desde un panel central.</p>
+    </article>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

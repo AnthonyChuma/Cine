@@ -1,0 +1,63 @@
+<%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const lista = Array.isArray(peliculas) ? peliculas : [];
+const content = `
+  <section class="page-heading compact-heading">
+    <span class="eyebrow">Administración</span>
+    <h1>Películas</h1>
+    <p>Gestiona los datos principales de las películas disponibles en cartelera.</p>
+  </section>
+
+  <section class="admin-grid-layout">
+    <form method="POST" action="/admin/peliculas" class="form-card admin-form">
+      <h2>Agregar película</h2>
+      <label>Título</label>
+      <input name="titulo" placeholder="Título de la película" required />
+      <label>Sinopsis</label>
+      <textarea name="sinopsis" placeholder="Descripción corta"></textarea>
+      <div class="two-cols">
+        <div><label>Duración</label><input name="duracion_minutos" type="number" placeholder="Minutos" /></div>
+        <div><label>Clasificación</label><input name="clasificacion" placeholder="ATP, +14" /></div>
+      </div>
+      <label>URL de imagen</label>
+      <input name="imagen_url" placeholder="https://..." />
+      <label>URL de tráiler</label>
+      <input name="trailer_url" placeholder="https://..." />
+      <div class="two-cols">
+        <div><label>Estado</label><input name="estado" placeholder="ACTIVA" /></div>
+        <div><label>Estreno</label><input name="fecha_estreno" type="date" /></div>
+      </div>
+      <label>ID género</label>
+      <input name="genero_id" type="number" placeholder="Ej. 1" />
+      <button class="btn btn-primary btn-full" type="submit">Guardar película</button>
+    </form>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h2>Listado</h2>
+        <span>${lista.length} registros</span>
+      </div>
+      <div class="responsive-table">
+        <table>
+          <thead><tr><th>Título</th><th>Género</th><th>Clasificación</th><th>Estado</th><th>Acción</th></tr></thead>
+          <tbody>
+            ${lista.map((pelicula) => `
+              <tr>
+                <td><strong>${h(pelicula.titulo)}</strong><small>${h((pelicula.sinopsis || '').slice(0, 85))}</small></td>
+                <td>${h(pelicula.genero || 'Sin género')}</td>
+                <td><span class="badge">${h(pelicula.clasificacion || 'S/C')}</span></td>
+                <td><span class="status status-ok">${h(pelicula.estado || 'ACTIVA')}</span></td>
+                <td>
+                  <form method="POST" action="/admin/peliculas/${Number(pelicula.id)}/eliminar" data-confirm="¿Eliminar esta película?">
+                    <button class="btn btn-danger btn-small" type="submit">Eliminar</button>
+                  </form>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

@@ -1,0 +1,17 @@
+<%
+const money = (value) => Number(value || 0).toFixed(2);
+const data = resumen || { ventas: 0, tickets: 0, usuarios: 0, peliculas: 0 };
+const content = `
+  <section class="page-heading compact-heading">
+    <span class="eyebrow">Reportes</span>
+    <h1>Resumen del sistema</h1>
+    <p>Indicadores principales para control operativo del cine.</p>
+  </section>
+  <section class="stats-grid">
+    <article class="stat-card big"><span>Ventas acumuladas</span><strong>Bs ${money(data.ventas)}</strong></article>
+    <article class="stat-card big"><span>Tickets vendidos</span><strong>${data.tickets || 0}</strong></article>
+    <article class="stat-card big"><span>Usuarios registrados</span><strong>${data.usuarios || 0}</strong></article>
+    <article class="stat-card big"><span>Películas activas</span><strong>${data.peliculas || 0}</strong></article>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

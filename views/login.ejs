@@ -1,0 +1,22 @@
+<%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const message = typeof error !== 'undefined' && error ? error : '';
+const content = `
+  <section class="auth-page">
+    <div class="auth-card">
+      <span class="eyebrow">Acceso seguro</span>
+      <h1>Iniciar sesión</h1>
+      <p class="auth-subtitle">Ingresa con tu cuenta para comprar tickets o administrar el sistema.</p>
+      ${message ? `<div class="alert alert-error">${h(message)}</div>` : ''}
+      <form method="POST" action="/login" class="form-grid">
+        <label>Correo</label>
+        <input type="email" name="correo" placeholder="correo@ejemplo.com" required />
+        <label>Contraseña</label>
+        <input type="password" name="password" placeholder="Tu contraseña" required />
+        <button class="btn btn-primary btn-full" type="submit">Entrar</button>
+      </form>
+      <p class="helper">¿No tienes cuenta? <a href="/registro">Regístrate aquí</a></p>
+    </div>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

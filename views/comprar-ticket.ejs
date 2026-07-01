@@ -1,0 +1,27 @@
+<%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const money = (value) => Number(value || 0).toFixed(2);
+const f = typeof funcion !== 'undefined' ? funcion : null;
+const content = `
+  <section class="auth-page wide-auth">
+    <div class="auth-card">
+      <span class="eyebrow">Compra de ticket</span>
+      <h1>${f ? h(f.pelicula) : 'Función no disponible'}</h1>
+      ${f ? `
+        <div class="ticket-preview">
+          <div><span>Fecha</span><strong>${h(f.fecha)}</strong></div>
+          <div><span>Horario</span><strong>${h(f.hora_inicio)} - ${h(f.hora_fin)}</strong></div>
+          <div><span>Sala</span><strong>${h(f.sala)}</strong></div>
+          <div><span>Precio</span><strong>Bs ${money(f.precio)}</strong></div>
+        </div>
+        <form method="POST" action="/comprar/${Number(f.id)}" class="form-grid">
+          <input type="hidden" name="funcionId" value="${Number(f.id)}" />
+          <label>ID de asiento</label>
+          <input type="number" name="asientoId" min="1" placeholder="Ej. 1" required />
+          <button class="btn btn-primary btn-full" type="submit">Confirmar compra</button>
+        </form>
+      ` : `<p>La función solicitada no existe o ya no está disponible.</p><a class="btn btn-primary" href="/cartelera">Volver a cartelera</a>`}
+    </div>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

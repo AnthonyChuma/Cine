@@ -1,0 +1,53 @@
+<%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const money = (value) => Number(value || 0).toFixed(2);
+const lista = Array.isArray(funciones) ? funciones : [];
+const content = `
+  <section class="detail-hero">
+    <div class="detail-poster ${pelicula && pelicula.imagen_url ? '' : 'poster-empty'}">
+      ${pelicula && pelicula.imagen_url ? `<img src="${h(pelicula.imagen_url)}" alt="${h(pelicula.titulo)}" />` : '<span>🎬</span>'}
+    </div>
+    <div class="detail-info">
+      <span class="eyebrow">Detalle de película</span>
+      <h1>${pelicula ? h(pelicula.titulo) : 'Película no encontrada'}</h1>
+      <p>${pelicula ? h(pelicula.sinopsis || 'Sin sinopsis disponible.') : 'No existe la película solicitada.'}</p>
+      ${pelicula ? `
+        <div class="movie-meta movie-meta-large">
+          <span>${h(pelicula.genero || 'Sin género')}</span>
+          <span>${h(pelicula.clasificacion || 'S/C')}</span>
+          <span>${h(pelicula.duracion_minutos ? `${pelicula.duracion_minutos} min` : 'Duración no definida')}</span>
+        </div>
+      ` : ''}
+    </div>
+  </section>
+
+  <section class="section-block">
+    <div class="section-title-row">
+      <div>
+        <span class="eyebrow">Funciones</span>
+        <h2>Horarios disponibles</h2>
+      </div>
+      <a class="btn btn-outline" href="/cartelera">Volver a cartelera</a>
+    </div>
+    <div class="cards cards-compact">
+      ${lista.length ? lista.map((funcion) => `
+        <article class="card function-card">
+          <div>
+            <h3>${h(funcion.fecha)}</h3>
+            <p>${h(funcion.hora_inicio)} - ${h(funcion.hora_fin)}</p>
+            <p>Sala: ${h(funcion.sala)}</p>
+          </div>
+          <div class="function-price">Bs ${money(funcion.precio)}</div>
+          <a class="btn btn-primary" href="/comprar/${Number(funcion.id)}">Comprar ticket</a>
+        </article>
+      `).join('') : `
+        <div class="empty-state">
+          <span>🕒</span>
+          <h3>No hay funciones disponibles</h3>
+          <p>Esta película aún no tiene horarios programados.</p>
+        </div>
+      `}
+    </div>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

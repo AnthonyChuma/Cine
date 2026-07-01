@@ -1,0 +1,11 @@
+<% const content = `
+  <section class="error-page">
+    <div class="error-card">
+      <span>🚫</span>
+      <h1>No autorizado</h1>
+      <p>No tienes permisos para ver esta sección. Inicia sesión con una cuenta permitida.</p>
+      <a class="btn btn-primary" href="/">Volver al inicio</a>
+    </div>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

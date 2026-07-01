@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08090d" />
+    <title><%= title %> - Cine Hispano</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <nav class="navbar">
+        <a class="brand" href="/" aria-label="Inicio Cine Hispano">
+          <span class="brand-mark">🎬</span>
+          <span>
+            Cine Hispano
+            <small>Potosí</small>
+          </span>
+        </a>
+
+        <button class="nav-toggle" type="button" aria-label="Abrir menú" data-nav-toggle>☰</button>
+
+        <div class="nav-links" data-nav-menu>
+          <a href="/">Inicio</a>
+          <a href="/cartelera">Cartelera</a>
+          <% if (!user) { %>
+            <a href="/login">Ingresar</a>
+            <a class="nav-cta" href="/registro">Registro</a>
+          <% } else { %>
+            <% if (user.rol === 'CLIENTE') { %>
+              <a href="/mis-tickets">Mis tickets</a>
+            <% } %>
+            <% if (user.rol === 'CAJERO' || user.rol === 'ADMIN') { %>
+              <a href="/caja">Caja</a>
+            <% } %>
+            <% if (user.rol === 'ADMIN') { %>
+              <a href="/admin">Admin</a>
+            <% } %>
+            <span class="user-pill"><%= user.rol %></span>
+            <form action="/logout" method="POST" class="logout-form">
+              <button type="submit" class="link-btn">Salir</button>
+            </form>
+          <% } %>
+        </div>
+      </nav>
+
+      <main class="container">
+        <%- body %>
+      </main>
+
+      <footer class="footer">
+        <span>© 2026 Cine Hispano Potosí</span>
+        <span>Venta de tickets y gestión de funciones</span>
+      </footer>
+    </div>
+    <script src="/js/app.js"></script>
+  </body>
+</html>

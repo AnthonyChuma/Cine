@@ -1,103 +1,123 @@
-# Sistema Web para la Venta de Tickets - Cine Hispano Potosí
+# Cine Hispano - Sistema Web de Venta de Tickets
 
-Proyecto full-stack para venta de tickets del Cine Hispano de la ciudad de Potosí.
+Aplicación web unificada para la venta de tickets del **Cine Hispano de la ciudad de Potosí**.
+
+El proyecto ahora está en una sola aplicación **Node.js + Express + EJS + PostgreSQL**, lista para ejecución local y despliegue en Railway.
 
 ## Estructura
 
 ```text
 Cine/
-├── Backend/              # Spring Boot + PostgreSQL + JWT + Flyway
-├── frontend/             # Web pública cliente Angular
-├── dashboard_frontend/   # Panel administrador/cajero Angular
-└── README.md
+├── controllers/
+├── middleware/
+├── models/
+├── public/
+│   ├── css/
+│   └── js/
+├── routes/
+├── views/
+├── .env.example
+├── .gitignore
+├── package.json
+├── railway.toml
+├── README.md
+└── server.js
 ```
 
-## Puertos locales
+## Requisitos
 
-- Backend: http://localhost:8080
-- Frontend cliente: http://localhost:4200
-- Dashboard: http://localhost:4300
+- Node.js 20 o superior
+- npm
+- PostgreSQL en Railway
 
-## Variables para backend local
+## Instalación local
 
-Configura estas variables en CMD antes de arrancar el backend. Usa los datos públicos de Railway, no `postgres.railway.internal`.
-
-```cmd
-cd C:\Cine\Backend
-set PGHOST=reseau.proxy.rlwy.net
-set PGPORT=PUERTO_PUBLICO_RAILWAY
-set PGDATABASE=railway
-set PGUSER=postgres
-set PGPASSWORD=TU_PASSWORD_RAILWAY
-set JWT_SECRET=clave_segura_local_123456789_para_pruebas_cine_hispano_2026
-set FRONTEND_URL=http://localhost:8080
-set DASHBOARD_URL=http://localhost:8080
-set SPRING_PROFILES_ACTIVE=dev
-```
-
-## Ejecutar backend
-
-```cmd
-cd C:\Cine\Backend
-mvn clean
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-```
-
-Al iniciar, Flyway ejecuta migraciones:
-
-- `V1__init_schema.sql`: crea tablas.
-- `V2__seed_data.sql`: crea roles, géneros, salas, asientos y admin.
-- `V3__seed_movies_functions.sql`: crea cartelera y funciones de prueba.
-
-## Ejecutar frontend cliente
-
-```cmd
-cd C:\Cine\frontend
+```bash
 npm install
-npx ng serve --port 4200 --open
 ```
 
-## Ejecutar dashboard
+Crea un archivo `.env` basado en `.env.example`:
 
-```cmd
-cd C:\Cine\dashboard_frontend
-npm install
-npx ng serve --port 4300 --open
+```env
+PORT=8080
+NODE_ENV=development
+DATABASE_URL=postgresql://postgres:TU_PASSWORD@reseau.proxy.rlwy.net:53406/railway
+JWT_SECRET=clave_segura_larga_cine_hispano_2026
 ```
 
-## Endpoints principales
+Luego ejecuta:
+
+```bash
+npm run dev
+```
+
+Abrir:
 
 ```text
-GET  /api/public/peliculas
-GET  /api/public/peliculas/{id}
-GET  /api/public/funciones
-GET  /api/public/peliculas/{id}/funciones
-GET  /api/public/funciones/{id}/asientos
-POST /api/auth/register
-POST /api/auth/login
-POST /api/cliente/comprar-ticket
-GET  /api/cliente/mis-tickets
-GET  /api/admin/reportes/dashboard
+http://localhost:8080/
+http://localhost:8080/cartelera
+http://localhost:8080/login
+http://localhost:8080/api/public/peliculas
 ```
 
-## Pruebas rápidas
+## Variables en Railway
 
-```cmd
-curl.exe http://localhost:8080/api/public/peliculas
-curl.exe http://localhost:8080/api/public/funciones
-curl.exe http://localhost:8080/api/public/funciones/1/asientos
+En el servicio donde despliegas la página, agrega:
+
+```env
+NODE_ENV=production
+PORT=8080
+DATABASE_URL=PEGAR_AQUI_DATABASE_PUBLIC_URL_DE_POSTGRES
+JWT_SECRET=clave_larga_privada_y_segura
 ```
+
+Si la base PostgreSQL está en otro proyecto Railway, usa el valor de `DATABASE_PUBLIC_URL` como `DATABASE_URL`.
+No uses `postgres.railway.internal` si la app y la base están en proyectos diferentes.
+
+## Comandos
+
+```bash
+npm start
+npm run dev
+```
+
+## Rutas principales
+
+- `/` página principal
+- `/cartelera` cartelera pública
+- `/login` login único
+- `/registro` registro de cliente
+- `/mis-tickets` tickets del cliente
+- `/comprar/:funcionId` compra de tickets
+- `/caja` panel de cajero
+- `/caja/venta` venta presencial
+- `/caja/validar-ticket` validación de tickets
+- `/admin` panel administrador
+- `/admin/peliculas` administración de películas
+- `/admin/funciones` administración de funciones
+- `/admin/usuarios` usuarios
+- `/admin/reportes` reportes
+
+## API
+
+- `GET /api/public/peliculas`
+- `GET /api/public/funciones`
+- `POST /api/auth/login`
+- `POST /api/auth/register`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
 
 ## Seguridad aplicada
 
-- JWT para autenticación.
-- BCrypt para contraseñas.
-- Roles: ADMIN, CAJERO y CLIENTE.
-- CORS limitado a frontend y dashboard.
-- DTOs para respuestas principales.
-- Migraciones con Flyway.
-- Base de datos PostgreSQL en Railway.
+- JWT en cookie `httpOnly`
+- bcrypt para contraseñas
+- rutas protegidas por rol
+- consultas SQL parametrizadas
+- Helmet configurado para producción
+- `.env` ignorado por Git
 
-## Nota de seguridad
+## Roles
 
-No subas credenciales reales de Railway ni `JWT_SECRET` al repositorio. Si alguna contraseña se mostró en una captura, cambia/regenera la contraseña de PostgreSQL en Railway.
+- `CLIENTE`: cartelera, compra y mis tickets
+- `CAJERO`: caja, venta presencial y validación
+- `ADMIN`: administración general

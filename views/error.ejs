@@ -1,0 +1,13 @@
+<%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const content = `
+  <section class="error-page">
+    <div class="error-card">
+      <span>⚠️</span>
+      <h1>${h(title || 'Error')}</h1>
+      <p>${h(message || 'Ocurrió un error inesperado.')}</p>
+      <a class="btn btn-primary" href="/">Volver al inicio</a>
+    </div>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

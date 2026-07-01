@@ -1,0 +1,33 @@
+<%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const lista = Array.isArray(usuarios) ? usuarios : [];
+const content = `
+  <section class="page-heading compact-heading">
+    <span class="eyebrow">Administración</span>
+    <h1>Usuarios</h1>
+    <p>Consulta los usuarios registrados y sus roles dentro del sistema.</p>
+  </section>
+
+  <section class="table-card full-width-card">
+    <div class="table-header">
+      <h2>Listado de usuarios</h2>
+      <span>${lista.length} registros</span>
+    </div>
+    <div class="responsive-table">
+      <table>
+        <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th></tr></thead>
+        <tbody>
+          ${lista.map((usuario) => `
+            <tr>
+              <td><strong>${h(usuario.nombre)} ${h(usuario.apellido)}</strong></td>
+              <td>${h(usuario.correo)}</td>
+              <td><span class="badge">${h(usuario.rol)}</span></td>
+              <td><span class="status status-ok">${h(usuario.estado)}</span></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

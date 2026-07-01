@@ -1,0 +1,23 @@
+<%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const lista = Array.isArray(funciones) ? funciones : [];
+const content = `
+  <section class="auth-page wide-auth">
+    <div class="auth-card">
+      <span class="eyebrow">Caja</span>
+      <h1>Venta presencial</h1>
+      <p class="auth-subtitle">Selecciona la función, registra el asiento y confirma la venta.</p>
+      <form method="POST" action="/caja/venta" class="form-grid">
+        <label>Función</label>
+        <select name="funcionId" required>
+          <option value="">Selecciona una función</option>
+          ${lista.map((funcion) => `<option value="${Number(funcion.id)}">${h(funcion.pelicula)} | ${h(funcion.fecha)} | ${h(funcion.hora_inicio)} | ${h(funcion.sala)}</option>`).join('')}
+        </select>
+        <label>ID de asiento</label>
+        <input type="number" name="asientoId" min="1" placeholder="Ej. 1" required />
+        <button class="btn btn-primary btn-full" type="submit">Registrar venta</button>
+      </form>
+    </div>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

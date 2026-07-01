@@ -1,0 +1,28 @@
+<%
+const money = (value) => Number(value || 0).toFixed(2);
+const data = resumen || { ventas: 0, tickets: 0, usuarios: 0, peliculas: 0 };
+const content = `
+  <section class="dashboard-hero">
+    <div>
+      <span class="eyebrow">Panel administrador</span>
+      <h1>Gestión general del Cine Hispano</h1>
+      <p>Administra la cartelera, funciones, usuarios y reportes desde un solo lugar.</p>
+    </div>
+    <a class="btn btn-primary" href="/admin/peliculas">Nueva película</a>
+  </section>
+
+  <section class="stats-grid">
+    <article class="stat-card"><span>Ventas</span><strong>Bs ${money(data.ventas)}</strong></article>
+    <article class="stat-card"><span>Tickets</span><strong>${data.tickets || 0}</strong></article>
+    <article class="stat-card"><span>Usuarios</span><strong>${data.usuarios || 0}</strong></article>
+    <article class="stat-card"><span>Películas activas</span><strong>${data.peliculas || 0}</strong></article>
+  </section>
+
+  <section class="cards admin-actions">
+    <a class="card action-card" href="/admin/peliculas"><span>🎬</span><h3>Películas</h3><p>Crear, editar y eliminar películas de cartelera.</p></a>
+    <a class="card action-card" href="/admin/funciones"><span>🕒</span><h3>Funciones</h3><p>Configurar horarios, salas y precios.</p></a>
+    <a class="card action-card" href="/admin/usuarios"><span>👥</span><h3>Usuarios</h3><p>Revisar clientes, cajeros y administradores.</p></a>
+    <a class="card action-card" href="/admin/reportes"><span>📈</span><h3>Reportes</h3><p>Consultar métricas básicas del sistema.</p></a>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

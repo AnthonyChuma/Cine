@@ -1,0 +1,16 @@
+<% const content = `
+  <section class="auth-page wide-auth">
+    <div class="auth-card">
+      <span class="eyebrow">Caja</span>
+      <h1>Validar ticket</h1>
+      <p class="auth-subtitle">Introduce el código impreso o digital del ticket.</p>
+      <form method="GET" action="/caja/validar-ticket" class="form-grid">
+        <label>Código de ticket</label>
+        <input type="text" name="codigo" placeholder="TKT-123456789" />
+        <button class="btn btn-primary btn-full" type="submit">Validar</button>
+      </form>
+      <div class="info-box">La validación puede conectarse a la consulta real del ticket cuando se requiera.</div>
+    </div>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

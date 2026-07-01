@@ -1,0 +1,28 @@
+<% const content = `
+  <section class="auth-page">
+    <div class="auth-card">
+      <span class="eyebrow">Nueva cuenta</span>
+      <h1>Registro de cliente</h1>
+      <p class="auth-subtitle">Crea tu cuenta para comprar tickets y revisar tus reservas.</p>
+      <form method="POST" action="/registro" class="form-grid">
+        <div class="two-cols">
+          <div>
+            <label>Nombre</label>
+            <input type="text" name="nombre" placeholder="Tu nombre" required />
+          </div>
+          <div>
+            <label>Apellido</label>
+            <input type="text" name="apellido" placeholder="Tu apellido" required />
+          </div>
+        </div>
+        <label>Correo</label>
+        <input type="email" name="correo" placeholder="correo@ejemplo.com" required />
+        <label>Contraseña</label>
+        <input type="password" name="password" placeholder="Mínimo 6 caracteres" required />
+        <button class="btn btn-primary btn-full" type="submit">Crear cuenta</button>
+      </form>
+      <p class="helper">¿Ya tienes cuenta? <a href="/login">Inicia sesión</a></p>
+    </div>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

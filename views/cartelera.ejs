@@ -1,0 +1,41 @@
+<%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const short = (value, size = 150) => {
+  const text = String(value ?? 'Sin sinopsis disponible.');
+  return text.length > size ? `${text.slice(0, size).trim()}...` : text;
+};
+const items = Array.isArray(peliculas) ? peliculas : [];
+const content = `
+  <section class="page-heading">
+    <span class="eyebrow">Cartelera</span>
+    <h1>Películas disponibles</h1>
+    <p>Elige tu película favorita y revisa sus funciones programadas.</p>
+  </section>
+
+  <section class="movie-grid">
+    ${items.length ? items.map((pelicula) => `
+      <article class="movie-card">
+        <div class="movie-poster ${pelicula.imagen_url ? '' : 'poster-empty'}">
+          ${pelicula.imagen_url ? `<img src="${h(pelicula.imagen_url)}" alt="${h(pelicula.titulo)}" loading="lazy" />` : '<span>🎬</span>'}
+          <span class="movie-status">${h(pelicula.estado || 'ACTIVA')}</span>
+        </div>
+        <div class="movie-body">
+          <h3>${h(pelicula.titulo)}</h3>
+          <p>${h(short(pelicula.sinopsis))}</p>
+          <div class="movie-meta">
+            <span>${h(pelicula.genero || 'Sin género')}</span>
+            <span>${h(pelicula.clasificacion || 'S/C')}</span>
+          </div>
+          <a class="btn btn-primary btn-full" href="/pelicula/${Number(pelicula.id)}">Ver funciones</a>
+        </div>
+      </article>
+    `).join('') : `
+      <div class="empty-state">
+        <span>🎞️</span>
+        <h3>No hay películas activas</h3>
+        <p>Vuelve pronto para revisar nuevas funciones.</p>
+      </div>
+    `}
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>

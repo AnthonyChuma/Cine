@@ -1,0 +1,57 @@
+<%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const money = (value) => Number(value || 0).toFixed(2);
+const lista = Array.isArray(funciones) ? funciones : [];
+const content = `
+  <section class="page-heading compact-heading">
+    <span class="eyebrow">Administración</span>
+    <h1>Funciones</h1>
+    <p>Programa horarios, salas y precios para cada película.</p>
+  </section>
+
+  <section class="admin-grid-layout">
+    <form method="POST" action="/admin/funciones" class="form-card admin-form">
+      <h2>Agregar función</h2>
+      <div class="two-cols">
+        <div><label>ID película</label><input name="pelicula_id" type="number" placeholder="Ej. 1" required /></div>
+        <div><label>ID sala</label><input name="sala_id" type="number" placeholder="Ej. 1" required /></div>
+      </div>
+      <label>Fecha</label>
+      <input name="fecha" type="date" required />
+      <div class="two-cols">
+        <div><label>Inicio</label><input name="hora_inicio" type="time" required /></div>
+        <div><label>Fin</label><input name="hora_fin" type="time" required /></div>
+      </div>
+      <div class="two-cols">
+        <div><label>Precio</label><input name="precio" type="number" step="0.01" placeholder="35.00" required /></div>
+        <div><label>Estado</label><input name="estado" placeholder="PROGRAMADA" /></div>
+      </div>
+      <button class="btn btn-primary btn-full" type="submit">Guardar función</button>
+    </form>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h2>Funciones programadas</h2>
+        <span>${lista.length} registros</span>
+      </div>
+      <div class="responsive-table">
+        <table>
+          <thead><tr><th>Película</th><th>Sala</th><th>Fecha</th><th>Horario</th><th>Precio</th><th>Estado</th></tr></thead>
+          <tbody>
+            ${lista.map((funcion) => `
+              <tr>
+                <td><strong>${h(funcion.pelicula)}</strong></td>
+                <td>${h(funcion.sala)}</td>
+                <td>${h(funcion.fecha)}</td>
+                <td>${h(funcion.hora_inicio)} - ${h(funcion.hora_fin)}</td>
+                <td>Bs ${money(funcion.precio)}</td>
+                <td><span class="status status-ok">${h(funcion.estado || 'PROGRAMADA')}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+`; %>
+<%- include('layout', { title, user, body: content }) %>
