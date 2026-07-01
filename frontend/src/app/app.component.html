@@ -1,0 +1,133 @@
+<header class="navbar">
+  <div class="brand" (click)="volverInicio()"><span></span> Cine Hispano <small>Potosí</small></div>
+  <nav>
+    <button (click)="volverInicio()">Cartelera</button>
+    <button (click)="cargarMisTickets()">Mis tickets</button>
+    <button *ngIf="!autenticado" (click)="vista='login'">Ingresar</button>
+    <button *ngIf="!autenticado" class="gold" (click)="vista='registro'">Registrarse</button>
+    <button *ngIf="autenticado" class="danger" (click)="cerrarSesion()">Salir</button>
+  </nav>
+</header>
+
+<main>
+  <section class="hero" *ngIf="vista === 'home'">
+    <div>
+      <p class="eyebrow">Sistema web de venta de tickets</p>
+      <h1>Compra tus entradas para el Cine Hispano de Potosí</h1>
+      <p>Consulta la cartelera, elige función, selecciona asiento y genera tu ticket digital.</p>
+      <div class="hero-actions">
+        <a href="#cartelera" class="btn primary">Ver cartelera</a>
+        <button class="btn secondary" (click)="vista='registro'">Crear cuenta</button>
+      </div>
+    </div>
+    <div class="hero-card">
+      <span>ESTRENO</span>
+      <h2>{{ peliculas.length > 0 ? peliculas[0].titulo : 'Cartelera Cine Hispano' }}</h2>
+      <p>{{ peliculas.length > 0 ? peliculas[0].sinopsis : 'Funciones actualizadas desde el sistema.' }}</p>
+    </div>
+  </section>
+
+  <p class="message" *ngIf="mensaje">{{ mensaje }}</p>
+
+  <section id="cartelera" *ngIf="vista === 'home'" class="section">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Cine Hispano</p>
+        <h2>Cartelera</h2>
+      </div>
+      <input type="search" [(ngModel)]="filtro" placeholder="Buscar por película, género o clasificación">
+    </div>
+
+    <div *ngIf="cargando" class="empty">Cargando cartelera...</div>
+    <div *ngIf="!cargando && peliculasFiltradas.length === 0" class="empty">No hay películas para mostrar.</div>
+
+    <div class="movies-grid">
+      <article class="movie-card" *ngFor="let pelicula of peliculasFiltradas">
+        <div class="poster" [style.background-image]="'url(' + pelicula.imagenUrl + ')'">
+          <span>{{ pelicula.clasificacion }}</span>
+        </div>
+        <div class="movie-body">
+          <p>{{ pelicula.generoNombre }}</p>
+          <h3>{{ pelicula.titulo }}</h3>
+          <small>{{ pelicula.duracionMinutos }} min</small>
+          <button class="btn primary full" (click)="verDetalle(pelicula)">Comprar ticket</button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section *ngIf="vista === 'detalle' && peliculaSeleccionada" class="detail">
+    <button class="link" (click)="volverInicio()">← Volver</button>
+    <div class="detail-card">
+      <img [src]="peliculaSeleccionada.imagenUrl" [alt]="peliculaSeleccionada.titulo">
+      <div>
+        <p class="eyebrow">{{ peliculaSeleccionada.generoNombre }} • {{ peliculaSeleccionada.clasificacion }}</p>
+        <h2>{{ peliculaSeleccionada.titulo }}</h2>
+        <p>{{ peliculaSeleccionada.sinopsis }}</p>
+        <strong>Duración: {{ peliculaSeleccionada.duracionMinutos }} minutos</strong>
+        <h3>Funciones disponibles</h3>
+        <div class="showtimes">
+          <button *ngFor="let funcion of funciones" (click)="elegirFuncion(funcion)">
+            {{ funcion.fecha }} • {{ funcion.horaInicio }} • {{ funcion.salaNombre }} • Bs {{ funcion.precio }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section *ngIf="vista === 'asientos' && funcionSeleccionada" class="section">
+    <button class="link" (click)="vista='detalle'">← Volver a funciones</button>
+    <h2>Selecciona tus asientos</h2>
+    <p>{{ funcionSeleccionada.peliculaTitulo }} • {{ funcionSeleccionada.fecha }} • {{ funcionSeleccionada.horaInicio }}</p>
+    <div class="screen">PANTALLA</div>
+    <div class="seat-map">
+      <button *ngFor="let asiento of asientos"
+        [class.occupied]="asiento.ocupado"
+        [class.selected]="asientoSeleccionado?.id === asiento.id"
+        [disabled]="!asiento.disponible"
+        (click)="seleccionarAsiento(asiento)">
+        {{ asiento.fila }}{{ asiento.numero }}
+      </button>
+    </div>
+    <div class="checkout">
+      <div>
+        <strong>Asiento:</strong> {{ asientoSeleccionado ? asientoSeleccionado.fila + asientoSeleccionado.numero : 'Sin seleccionar' }}<br>
+        <strong>Total:</strong> Bs {{ funcionSeleccionada.precio }}
+      </div>
+      <button class="btn primary" (click)="comprar()">Confirmar compra</button>
+    </div>
+    <article class="ticket" *ngIf="ticketGenerado">
+      <span>Ticket digital</span>
+      <h3>{{ ticketGenerado.codigoUnico }}</h3>
+      <p>{{ ticketGenerado.peliculaTitulo }} • {{ ticketGenerado.asiento }} • Bs {{ ticketGenerado.total }}</p>
+    </article>
+  </section>
+
+  <section *ngIf="vista === 'login'" class="auth-card">
+    <h2>Iniciar sesión</h2>
+    <input [(ngModel)]="loginData.correo" placeholder="Correo">
+    <input [(ngModel)]="loginData.password" placeholder="Contraseña" type="password">
+    <button class="btn primary full" (click)="login()">Ingresar</button>
+  </section>
+
+  <section *ngIf="vista === 'registro'" class="auth-card">
+    <h2>Crear cuenta</h2>
+    <input [(ngModel)]="registroData.nombre" placeholder="Nombre">
+    <input [(ngModel)]="registroData.apellido" placeholder="Apellido">
+    <input [(ngModel)]="registroData.correo" placeholder="Correo">
+    <input [(ngModel)]="registroData.password" placeholder="Contraseña" type="password">
+    <button class="btn primary full" (click)="registrar()">Registrarme</button>
+  </section>
+
+  <section *ngIf="vista === 'tickets'" class="section">
+    <h2>Mis tickets</h2>
+    <div *ngIf="misTickets.length === 0" class="empty">Todavía no tienes tickets.</div>
+    <article class="ticket" *ngFor="let ticket of misTickets">
+      <span>{{ ticket.estado }}</span>
+      <h3>{{ ticket.codigoUnico }}</h3>
+      <p>{{ ticket.peliculaTitulo }} • {{ ticket.fechaFuncion }} {{ ticket.horaInicio }} • {{ ticket.salaNombre }} • Asiento {{ ticket.asiento }}</p>
+    </article>
+  </section>
+</main>
+
+<footer>© 2026 Cine Hispano Potosí • Sistema web de venta de tickets</footer>

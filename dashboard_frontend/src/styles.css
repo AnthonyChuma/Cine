@@ -1,0 +1,4 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, Arial, sans-serif; background: #0B0B0F; color: #F5F5F5; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
