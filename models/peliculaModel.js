@@ -4,11 +4,7 @@ async function getPeliculas({ vigentes = true } = {}) {
   const conditions = vigentes
     ? `WHERE p.estado = 'ACTIVA'
        AND (p.fecha_inicio_vigencia IS NULL OR p.fecha_inicio_vigencia <= CURRENT_DATE)
-       AND (p.fecha_fin_vigencia IS NULL OR p.fecha_fin_vigencia >= CURRENT_DATE)
-       AND EXISTS (
-         SELECT 1 FROM funciones f
-         WHERE f.pelicula_id = p.id AND f.estado = 'PROGRAMADA' AND f.fecha >= CURRENT_DATE
-       )`
+       AND (p.fecha_fin_vigencia IS NULL OR p.fecha_fin_vigencia >= CURRENT_DATE)`
     : '';
 
   const result = await query(`
@@ -58,9 +54,6 @@ async function getPeliculaActivaVigenteById(id) {
       AND p.estado = 'ACTIVA'
       AND (p.fecha_inicio_vigencia IS NULL OR p.fecha_inicio_vigencia <= CURRENT_DATE)
       AND (p.fecha_fin_vigencia IS NULL OR p.fecha_fin_vigencia >= CURRENT_DATE)
-      AND EXISTS (
-        SELECT 1 FROM funciones f WHERE f.pelicula_id = p.id AND f.estado = 'PROGRAMADA' AND f.fecha >= CURRENT_DATE
-      )
   `, [id]);
   return result.rows[0] || null;
 }
@@ -122,7 +115,13 @@ async function updatePelicula(id, data) {
 }
 
 async function deletePelicula(id) {
-  await query('DELETE FROM peliculas WHERE id = $1', [id]);
+  const result = await query(`
+    UPDATE peliculas
+    SET estado = 'INACTIVA'
+    WHERE id = $1
+    RETURNING id
+  `, [id]);
+  return result.rows[0] || null;
 }
 
 module.exports = { getPeliculas, getPeliculasAdmin, getPeliculaById, getPeliculaActivaVigenteById, createPelicula, updatePelicula, deletePelicula };

@@ -35,6 +35,7 @@ router.post('/admin/peliculas', authorizeRoles('ADMIN'), [
   body('sala_id').isInt({ min: 1 }),
   body('precio').isFloat({ min: 0 })
 ], validateMiddleware, adminController.crearPelicula);
+router.post('/admin/peliculas/:id/eliminar', authorizeRoles('ADMIN'), adminController.eliminarPelicula);
 router.post('/admin/peliculas/:id/funciones-mensuales', authorizeRoles('ADMIN'), [
   body('fecha_inicio_vigencia').isDate(),
   body('fecha_fin_vigencia').optional().isDate(),
