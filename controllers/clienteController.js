@@ -69,7 +69,16 @@ async function procesarCompra(req, res, next) {
     const tickets = [];
     for (const asiento of asientos) {
       const codigoTicket = `TKT-${Date.now()}-${asiento.codigo_asiento}`;
-      const ticket = await ticketModel.createTicket({ usuarioId: req.user.id, funcionId: id, asientoId: asiento.id, ventaId: venta.id, codigoUnico: codigoTicket, total: funcion.precio });
+      const ticket = await ticketModel.createTicket({
+        usuarioId: req.user.id,
+        peliculaId: funcion.pelicula_id,
+        funcionId: id,
+        salaId: funcion.sala_id,
+        asientoId: asiento.id,
+        ventaId: venta.id,
+        codigoUnico: codigoTicket,
+        total: funcion.precio
+      });
       await ventaModel.createDetalleVenta({ ventaId: venta.id, ticketId: ticket.id, precioUnitario: funcion.precio });
       tickets.push(ticket);
     }

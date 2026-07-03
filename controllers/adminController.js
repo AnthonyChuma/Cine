@@ -90,6 +90,27 @@ async function nuevaPelicula(req, res, next) {
   }
 }
 
+async function editarSalaFormulario(req, res, next) {
+  try {
+    const sala = await salaModel.getSalaById(req.params.id);
+    if (!sala) {
+      return res.status(404).render('error', { title: 'Sala no encontrada', message: 'No existe la sala solicitada.', user: req.user || null });
+    }
+    res.render('admin-sala-form', { title: 'Editar sala', sala, user: req.user || null });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function editarSala(req, res, next) {
+  try {
+    await salaModel.updateSala(req.params.id, req.body);
+    res.redirect('/admin/salas');
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function crearPelicula(req, res, next) {
   try {
     const pelicula = await peliculaModel.createPelicula(req.body);
@@ -162,7 +183,8 @@ async function adminUsuarios(req, res, next) {
 async function adminReportes(req, res, next) {
   try {
     const resumen = await reporteModel.getResumen();
-    res.render('admin-reportes', { title: 'Reportes', resumen, user: req.user || null });
+    const peliculas = await peliculaModel.getPeliculasAdmin();
+    res.render('admin-reportes', { title: 'Reportes', resumen, peliculas, reportePorPelicula: null, detalleFunciones: [], pelicula_id: null, user: req.user || null });
   } catch (error) {
     next(error);
   }
@@ -170,8 +192,16 @@ async function adminReportes(req, res, next) {
 
 async function adminReportesPorPelicula(req, res, next) {
   try {
-    const peliculas = await reporteModel.getVentasPorPelicula();
-    res.render('admin-reportes', { title: 'Reporte por película', resumen: null, reportes: peliculas, user: req.user || null });
+    const peliculaId = Number(req.query.pelicula_id);
+    const peliculas = await peliculaModel.getPeliculasAdmin();
+    if (!peliculaId || Number.isNaN(peliculaId)) {
+      const resumen = await reporteModel.getResumen();
+      return res.render('admin-reportes', { title: 'Reporte por película', resumen, peliculas, reportePorPelicula: null, detalleFunciones: [], pelicula_id: null, user: req.user || null });
+    }
+    const reporte = await reporteModel.getReportePorPelicula(peliculaId);
+    const detalleFunciones = await reporteModel.getDetalleFuncionesPorPelicula(peliculaId);
+    const resumen = await reporteModel.getResumen();
+    res.render('admin-reportes', { title: 'Reporte por película', resumen, peliculas, reportePorPelicula: reporte, detalleFunciones, pelicula_id: peliculaId, user: req.user || null });
   } catch (error) {
     next(error);
   }
@@ -209,6 +239,8 @@ module.exports = {
   adminSalas,
   nuevaSala,
   crearSala,
+  editarSalaFormulario,
+  editarSala,
   verAsientosSala,
   generarAsientosSala,
   adminPeliculas,

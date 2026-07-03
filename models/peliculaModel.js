@@ -66,6 +66,13 @@ async function getPeliculaActivaVigenteById(id) {
 }
 
 async function createPelicula(data) {
+  const inicio = data.fecha_inicio_vigencia ? new Date(data.fecha_inicio_vigencia) : null;
+  const fin = data.fecha_fin_vigencia ? new Date(data.fecha_fin_vigencia) : null;
+  let fechaFin = fin;
+  if (inicio && !fin) {
+    fechaFin = new Date(inicio);
+    fechaFin.setDate(fechaFin.getDate() + 30);
+  }
   const result = await query(`
     INSERT INTO peliculas (titulo, sinopsis, duracion_minutos, clasificacion, imagen_url, trailer_url, estado, fecha_estreno,
                             genero_id, fecha_inicio_vigencia, fecha_fin_vigencia, destacada, promocion)
@@ -82,7 +89,7 @@ async function createPelicula(data) {
     data.fecha_estreno || null,
     data.genero_id || null,
     data.fecha_inicio_vigencia || null,
-    data.fecha_fin_vigencia || null,
+    fechaFin ? fechaFin.toISOString().slice(0, 10) : null,
     data.destacada === 'on' || data.destacada === true || data.destacada === 'true',
     data.promocion || null
   ]);

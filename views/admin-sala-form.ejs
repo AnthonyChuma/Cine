@@ -1,34 +1,40 @@
 <%
 const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const salaData = typeof sala !== 'undefined' && sala ? sala : null;
+const isEdit = Boolean(salaData);
+const actionUrl = isEdit ? `/admin/salas/${Number(salaData.id)}/editar` : '/admin/salas';
+const pageTitle = isEdit ? 'Editar sala' : 'Nueva sala';
+const submitLabel = isEdit ? 'Actualizar sala' : 'Crear sala';
+const headingDescription = isEdit ? 'Modifica el nombre, tipo, filas, columnas y estado de la sala.' : 'Crea una nueva sala con filas, columnas y capacidad automática.';
 const content = `
   <section class="page-heading compact-heading">
     <span class="eyebrow">Administración</span>
-    <h1>Nueva sala</h1>
-    <p>Crea una nueva sala con filas, columnas y capacidad automática.</p>
+    <h1>${h(pageTitle)}</h1>
+    <p>${h(headingDescription)}</p>
   </section>
   <section class="auth-page wide-auth">
     <div class="auth-card">
-      <form method="POST" action="/admin/salas" class="form-grid">
+      <form method="POST" action="${actionUrl}" class="form-grid">
         <label>Nombre de la sala</label>
-        <input name="nombre" placeholder="Sala X" required />
+        <input name="nombre" placeholder="Sala X" required value="${h(salaData?.nombre)}" />
         <label>Tipo de sala</label>
-        <input name="tipo" placeholder="ESTANDAR" value="ESTANDAR" />
+        <input name="tipo" placeholder="ESTANDAR" value="${h(salaData?.tipo || 'ESTANDAR')}" />
         <div class="two-cols">
           <div>
             <label>Filas</label>
-            <input name="filas" type="number" min="1" placeholder="Ej. 6" required />
+            <input name="filas" type="number" min="1" placeholder="Ej. 6" required value="${Number(salaData?.filas) || ''}" />
           </div>
           <div>
             <label>Columnas</label>
-            <input name="columnas" type="number" min="1" placeholder="Ej. 8" required />
+            <input name="columnas" type="number" min="1" placeholder="Ej. 8" required value="${Number(salaData?.columnas) || ''}" />
           </div>
         </div>
         <label>Estado</label>
         <select name="estado">
-          <option selected>ACTIVA</option>
-          <option>INACTIVA</option>
+          <option value="ACTIVA" ${salaData?.estado === 'ACTIVA' ? 'selected' : ''}>ACTIVA</option>
+          <option value="INACTIVA" ${salaData?.estado === 'INACTIVA' ? 'selected' : ''}>INACTIVA</option>
         </select>
-        <button class="btn btn-primary btn-full" type="submit">Crear sala</button>
+        <button class="btn btn-primary btn-full" type="submit">${h(submitLabel)}</button>
       </form>
     </div>
   </section>

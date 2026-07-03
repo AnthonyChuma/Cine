@@ -26,8 +26,11 @@ const content = `
               <td>${Number(sala.filas)}</td>
               <td>${Number(sala.columnas)}</td>
               <td>${Number(sala.capacidad_total)}</td>
-              <td><span class="status status-ok">${h(sala.estado)}</span></td>
-              <td><a class="btn btn-outline btn-small" href="/admin/salas/${Number(sala.id)}/asientos">Ver asientos</a></td>
+              <td><span class="status ${sala.estado === 'ACTIVA' ? 'status-ok' : 'status-warning'}">${h(sala.estado)}</span></td>
+              <td>
+                <a class="btn btn-outline btn-small" href="/admin/salas/${Number(sala.id)}/asientos">Asientos</a>
+                <a class="btn btn-secondary btn-small" href="/admin/salas/${Number(sala.id)}/editar">Editar</a>
+              </td>
             </tr>
           `).join('')}
         </tbody>

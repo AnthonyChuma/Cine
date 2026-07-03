@@ -17,7 +17,7 @@ async function getTicketsByUsuario(usuarioId) {
 async function getTicketByFuncionAsiento(funcionId, asientoId) {
   const result = await query(`
     SELECT id FROM tickets
-    WHERE funcion_id = $1 AND asiento_id = $2 AND estado IN ('ACTIVO', 'USADO')
+    WHERE funcion_id = $1 AND asiento_id = $2 AND estado != 'ANULADO'
     LIMIT 1
   `, [funcionId, asientoId]);
   return result.rows[0] || null;
@@ -47,12 +47,12 @@ async function getTicketsByVentaId(ventaId) {
   return result.rows;
 }
 
-async function createTicket({ usuarioId, funcionId, asientoId, ventaId, codigoUnico, total }) {
+async function createTicket({ usuarioId, funcionId, asientoId, ventaId, codigoUnico, total, peliculaId, salaId }) {
   const result = await query(`
-    INSERT INTO tickets (codigo_unico, usuario_id, funcion_id, asiento_id, venta_id, estado, fecha_compra, total)
-    VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7)
+    INSERT INTO tickets (codigo_unico, usuario_id, pelicula_id, funcion_id, sala_id, asiento_id, venta_id, estado, fecha_compra, total)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), $9)
     RETURNING id
-  `, [codigoUnico, usuarioId, funcionId, asientoId, ventaId, 'ACTIVO', total]);
+  `, [codigoUnico, usuarioId, peliculaId || null, funcionId, salaId || null, asientoId, ventaId, 'ACTIVO', total]);
   return result.rows[0];
 }
 

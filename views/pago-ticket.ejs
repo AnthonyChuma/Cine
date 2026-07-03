@@ -32,6 +32,32 @@ const content = `
         </div>
       `}
 
+      ${Array.isArray(tickets) && tickets.length ? `
+        <div class="section-block">
+          <div class="section-title-row">
+            <div>
+              <span class="eyebrow">Tickets asociados</span>
+              <h2>Entradas generadas</h2>
+            </div>
+          </div>
+          <div class="responsive-table">
+            <table>
+              <thead><tr><th>Código</th><th>Película</th><th>Fecha</th><th>Hora</th><th>Asiento</th></tr></thead>
+              <tbody>
+                ${tickets.map((ticket) => `
+                  <tr>
+                    <td>${h(ticket.codigo_ticket)}</td>
+                    <td>${h(ticket.pelicula)}</td>
+                    <td>${h(ticket.fecha)}</td>
+                    <td>${h(ticket.hora_inicio)}</td>
+                    <td>${h(`${ticket.fila}${ticket.numero}`)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ` : ''}
       <form method="POST" action="/pago/${Number(venta.id)}/confirmar" class="form-grid">
         <button class="btn btn-primary btn-full" type="submit">Confirmar pago</button>
       </form>

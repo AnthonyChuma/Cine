@@ -84,10 +84,24 @@ async function generateAsientosForSala(salaId, filas, columnas) {
   return { created: result.rows.length, seatCount };
 }
 
+async function updateSala(id, { nombre, tipo, filas, columnas, estado }) {
+  const filasNum = Number(filas);
+  const columnasNum = Number(columnas);
+  const capacidadTotal = filasNum * columnasNum;
+  const result = await query(`
+    UPDATE salas
+    SET nombre = $1, tipo = $2, filas = $3, columnas = $4, capacidad_total = $5, estado = $6
+    WHERE id = $7
+    RETURNING id
+  `, [nombre, tipo || 'ESTANDAR', filasNum, columnasNum, capacidadTotal, estado || 'ACTIVA', id]);
+  return result.rows[0] || null;
+}
+
 module.exports = {
   getSalas,
   getSalaById,
   createSala,
+  updateSala,
   getAsientosBySala,
   hasAsientos,
   generateAsientosForSala

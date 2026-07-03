@@ -1,43 +1,80 @@
 <%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const money = (value) => Number(value || 0).toFixed(2);
 const data = resumen || { ventas: 0, tickets: 0, usuarios: 0, peliculas: 0 };
-const listaReportes = Array.isArray(reportes) ? reportes : [];
+const peliculasList = Array.isArray(peliculas) ? peliculas : [];
+const reporte = reportePorPelicula || null;
+const detalleFunciones = Array.isArray(detalleFunciones) ? detalleFunciones : [];
 const content = `
   <section class="page-heading compact-heading">
     <span class="eyebrow">Reportes</span>
-    <h1>Resumen del sistema</h1>
-    <p>Indicadores principales y ventas por película.</p>
+    <h1>Reporte de ventas</h1>
+    <p>Consulta tickets vendidos e ingresos para una película específica.</p>
   </section>
+
   <section class="stats-grid">
     <article class="stat-card big"><span>Ventas acumuladas</span><strong>Bs ${money(data.ventas)}</strong></article>
     <article class="stat-card big"><span>Tickets vendidos</span><strong>${data.tickets || 0}</strong></article>
     <article class="stat-card big"><span>Usuarios registrados</span><strong>${data.usuarios || 0}</strong></article>
     <article class="stat-card big"><span>Películas activas</span><strong>${data.peliculas || 0}</strong></article>
   </section>
-  ${listaReportes.length ? `
+
+  <section class="section-block">
+    <div class="section-title-row">
+      <div>
+        <span class="eyebrow">Reporte por película</span>
+        <h2>Selecciona una película</h2>
+      </div>
+    </div>
+    <form method="GET" action="/admin/reportes/pelicula" class="form-card admin-form">
+      <label>Película</label>
+      <select name="pelicula_id" required>
+        <option value="">Selecciona una película</option>
+        ${peliculasList.map((pelicula) => `<option value="${Number(pelicula.id)}" ${pelicula_id == pelicula.id ? 'selected' : ''}>${h(pelicula.titulo)}</option>`).join('')}
+      </select>
+      <button class="btn btn-primary btn-full" type="submit">Ver reporte</button>
+    </form>
+  </section>
+
+  ${reporte ? `
     <section class="section-block">
       <div class="section-title-row">
         <div>
-          <span class="eyebrow">Ventas por película</span>
-          <h2>Tickets vendidos e ingresos</h2>
+          <span class="eyebrow">Resumen de la película</span>
+          <h2>${h(reporte.titulo || 'Reporte seleccionado')}</h2>
         </div>
       </div>
-      <div class="responsive-table">
-        <table>
-          <thead><tr><th>Película</th><th>Entradas vendidas</th><th>Ingresos</th><th>Funciones</th><th>Asientos</th></tr></thead>
-          <tbody>
-            ${listaReportes.map((row) => `
-              <tr>
-                <td>${h(row.pelicula)}</td>
-                <td>${Number(row.entradas_vendidas)}</td>
-                <td>Bs ${money(row.ingresos_totales)}</td>
-                <td>${Array.isArray(row.funciones) ? row.funciones.join(', ') : h(row.funciones)}</td>
-                <td>${Array.isArray(row.asientos_vendidos) ? row.asientos_vendidos.join(', ') : h(row.asientos_vendidos)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+      <div class="stats-grid">
+        <article class="stat-card"><span>Tickets totales</span><strong>${reporte.cantidad_tickets || 0}</strong></article>
+        <article class="stat-card"><span>Activos</span><strong>${reporte.cantidad_activos || 0}</strong></article>
+        <article class="stat-card"><span>Usados</span><strong>${reporte.cantidad_usados || 0}</strong></article>
+        <article class="stat-card"><span>Anulados</span><strong>${reporte.cantidad_anulados || 0}</strong></article>
+        <article class="stat-card big"><span>Ingresos pagados</span><strong>Bs ${money(reporte.ingresos_pagados || 0)}</strong></article>
       </div>
+
+      ${detalleFunciones.length ? `
+        <div class="responsive-table">
+          <table>
+            <thead><tr><th>Fecha</th><th>Hora</th><th>Sala</th><th>Tickets vendidos</th></tr></thead>
+            <tbody>
+              ${detalleFunciones.map((funcion) => `
+                <tr>
+                  <td>${h(funcion.fecha)}</td>
+                  <td>${h(funcion.hora_inicio)} - ${h(funcion.hora_fin)}</td>
+                  <td>${h(funcion.sala)}</td>
+                  <td>${Number(funcion.entradas_vendidas)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : `
+        <div class="empty-state">
+          <span>📉</span>
+          <h3>No existen ventas registradas para esta película.</h3>
+          <p>Selecciona otra película o espera nuevos registros de ventas.</p>
+        </div>
+      `}
     </section>
   ` : ''}
 `; %>

@@ -1,4 +1,26 @@
 const { query } = require('./db');
+const peliculaModel = require('./peliculaModel');
+
+function addDays(date, days) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+function formatDate(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function addMinutesToTime(time, minutes) {
+  const [hours, mins] = time.split(':').map(Number);
+  const date = new Date(0, 0, 0, hours, mins);
+  date.setMinutes(date.getMinutes() + minutes);
+  return date.toTimeString().slice(0, 8);
+}
+
+function isValidTimeString(value) {
+  return /^\d{2}:\d{2}$/.test(value);
+}
 
 async function getFunciones() {
   const result = await query(`
@@ -24,7 +46,7 @@ async function getFuncionesPorPelicula(peliculaId) {
 
 async function getFuncionById(id) {
   const result = await query(`
-    SELECT f.id, f.fecha, f.hora_inicio, f.hora_fin, f.precio, f.estado, p.id AS pelicula_id, p.titulo AS pelicula, s.id AS sala_id, s.nombre AS sala
+    SELECT f.id, f.fecha, f.hora_inicio, f.hora_fin, f.precio, f.estado, p.id AS pelicula_id, p.titulo AS pelicula, p.duracion_minutos, s.id AS sala_id, s.nombre AS sala, s.estado AS sala_estado
     FROM funciones f
     JOIN peliculas p ON p.id = f.pelicula_id
     JOIN salas s ON s.id = f.sala_id
@@ -64,6 +86,23 @@ function formatDate(date) {
 }
 
 async function generarFuncionesMensuales({ pelicula_id, sala_id, fecha_inicio_vigencia, fecha_fin_vigencia, precio }) {
+  const pelicula = await peliculaModel.getPeliculaById(pelicula_id);
+  if (!pelicula) {
+    throw new Error('Película no encontrada.');
+  }
+  if (pelicula.estado !== 'ACTIVA') {
+    throw new Error('No se pueden generar funciones para una película inactiva.');
+  }
+
+  const salaResult = await query('SELECT id, estado, filas, columnas FROM salas WHERE id = $1', [sala_id]);
+  const sala = salaResult.rows[0];
+  if (!sala) {
+    throw new Error('Sala no encontrada.');
+  }
+  if (sala.estado !== 'ACTIVA') {
+    throw new Error('No se pueden generar funciones en una sala inactiva.');
+  }
+
   const startDate = new Date(fecha_inicio_vigencia);
   const endDate = fecha_fin_vigencia ? new Date(fecha_fin_vigencia) : addDays(startDate, 30);
   if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
@@ -78,24 +117,44 @@ async function generarFuncionesMensuales({ pelicula_id, sala_id, fecha_inicio_vi
     dates.push(formatDate(date));
   }
 
-  const existing = await query(`
-    SELECT 1 FROM funciones
-    WHERE sala_id = $1 AND fecha BETWEEN $2 AND $3 AND estado = 'PROGRAMADA'
-      AND hora_inicio IN ('15:00', '21:00')
-    LIMIT 1
-  `, [sala_id, formatDate(startDate), formatDate(endDate)]);
+  const duration = Number(pelicula.duracion_minutos) || 120;
+  const horarios = ['15:00', '21:00'];
+  const schedule = horarios.map((hora_inicio) => ({
+    hora_inicio,
+    hora_fin: addMinutesToTime(hora_inicio, duration)
+  }));
 
-  if (existing.rows.length > 0) {
-    throw new Error('Ya existe una función programada en la misma sala para las fechas seleccionadas.');
+  const overlaps = [];
+  for (const fecha of dates) {
+    for (const horario of schedule) {
+      const existing = await query(`
+        SELECT 1 FROM funciones
+        WHERE sala_id = $1
+          AND fecha = $2
+          AND estado = 'PROGRAMADA'
+          AND (
+            (hora_inicio <= $3 AND hora_fin > $3)
+            OR (hora_inicio < $4 AND hora_fin >= $4)
+            OR (hora_inicio >= $3 AND hora_fin <= $4)
+          )
+        LIMIT 1
+      `, [sala_id, fecha, horario.hora_inicio, horario.hora_fin]);
+      if (existing.rows.length > 0) {
+        overlaps.push(`${fecha} ${horario.hora_inicio}`);
+      }
+    }
+  }
+
+  if (overlaps.length > 0) {
+    throw new Error(`Ya existe una función programada en la misma sala para estos horarios: ${overlaps.join(', ')}.`);
   }
 
   const insertValues = [];
   const params = [];
   let index = 1;
   dates.forEach((fecha) => {
-    ['15:00', '21:00'].forEach((hora_inicio) => {
-      const hora_fin = hora_inicio === '15:00' ? '18:00' : '00:00';
-      params.push(pelicula_id, sala_id, fecha, hora_inicio, hora_fin, precio, 'PROGRAMADA');
+    schedule.forEach((horario) => {
+      params.push(pelicula_id, sala_id, fecha, horario.hora_inicio, horario.hora_fin, precio, 'PROGRAMADA');
       insertValues.push(`($${index++}, $${index++}, $${index++}, $${index++}, $${index++}, $${index++}, $${index++})`);
     });
   });

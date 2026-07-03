@@ -8,12 +8,19 @@ const validateMiddleware = require('../middleware/validateMiddleware');
 router.get('/admin', authorizeRoles('ADMIN'), adminController.admin);
 router.get('/admin/salas', authorizeRoles('ADMIN'), adminController.adminSalas);
 router.get('/admin/salas/nueva', authorizeRoles('ADMIN'), adminController.nuevaSala);
+router.get('/admin/salas/:id/editar', authorizeRoles('ADMIN'), adminController.editarSalaFormulario);
 router.post('/admin/salas', authorizeRoles('ADMIN'), [
   body('nombre').notEmpty().trim(),
   body('filas').isInt({ min: 1 }),
   body('columnas').isInt({ min: 1 }),
   body('estado').optional().isIn(['ACTIVA', 'INACTIVA'])
 ], validateMiddleware, adminController.crearSala);
+router.post('/admin/salas/:id/editar', authorizeRoles('ADMIN'), [
+  body('nombre').notEmpty().trim(),
+  body('filas').isInt({ min: 1 }),
+  body('columnas').isInt({ min: 1 }),
+  body('estado').optional().isIn(['ACTIVA', 'INACTIVA'])
+], validateMiddleware, adminController.editarSala);
 router.get('/admin/salas/:id/asientos', authorizeRoles('ADMIN'), adminController.verAsientosSala);
 router.post('/admin/salas/:id/asientos/generar', authorizeRoles('ADMIN'), adminController.generarAsientosSala);
 
