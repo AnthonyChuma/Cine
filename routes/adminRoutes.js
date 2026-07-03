@@ -21,6 +21,8 @@ router.post('/admin/salas/:id/editar', authorizeRoles('ADMIN'), [
   body('columnas').isInt({ min: 1 }),
   body('estado').optional().isIn(['ACTIVA', 'INACTIVA'])
 ], validateMiddleware, adminController.editarSala);
+router.post('/admin/salas/:id/activar', authorizeRoles('ADMIN'), adminController.activarSala);
+router.post('/admin/salas/:id/inactivar', authorizeRoles('ADMIN'), adminController.inactivarSala);
 router.get('/admin/salas/:id/asientos', authorizeRoles('ADMIN'), adminController.verAsientosSala);
 router.post('/admin/salas/:id/asientos/generar', authorizeRoles('ADMIN'), adminController.generarAsientosSala);
 
@@ -36,6 +38,7 @@ router.post('/admin/peliculas', authorizeRoles('ADMIN'), [
   body('precio').isFloat({ min: 0 })
 ], validateMiddleware, adminController.crearPelicula);
 router.post('/admin/peliculas/:id/eliminar', authorizeRoles('ADMIN'), adminController.eliminarPelicula);
+router.post('/admin/peliculas/:id/activar', authorizeRoles('ADMIN'), adminController.activarPelicula);
 router.post('/admin/peliculas/:id/funciones-mensuales', authorizeRoles('ADMIN'), [
   body('fecha_inicio_vigencia').isDate(),
   body('fecha_fin_vigencia').optional().isDate(),

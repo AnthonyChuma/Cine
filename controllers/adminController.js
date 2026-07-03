@@ -111,6 +111,24 @@ async function editarSala(req, res, next) {
   }
 }
 
+async function activarSala(req, res, next) {
+  try {
+    await salaModel.updateSalaEstado(req.params.id, 'ACTIVA');
+    res.redirect('/admin/salas');
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function inactivarSala(req, res, next) {
+  try {
+    await salaModel.updateSalaEstado(req.params.id, 'INACTIVA');
+    res.redirect('/admin/salas');
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function crearPelicula(req, res, next) {
   try {
     const pelicula = await peliculaModel.createPelicula(req.body);
@@ -141,6 +159,15 @@ async function editarPelicula(req, res, next) {
 async function eliminarPelicula(req, res, next) {
   try {
     await peliculaModel.deletePelicula(req.params.id);
+    res.redirect('/admin/peliculas');
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function activarPelicula(req, res, next) {
+  try {
+    await peliculaModel.activatePelicula(req.params.id);
     res.redirect('/admin/peliculas');
   } catch (error) {
     next(error);

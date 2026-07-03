@@ -97,11 +97,22 @@ async function updateSala(id, { nombre, tipo, filas, columnas, estado }) {
   return result.rows[0] || null;
 }
 
+async function updateSalaEstado(id, estado) {
+  const result = await query(`
+    UPDATE salas
+    SET estado = $1
+    WHERE id = $2
+    RETURNING id
+  `, [estado, id]);
+  return result.rows[0] || null;
+}
+
 module.exports = {
   getSalas,
   getSalaById,
   createSala,
   updateSala,
+  updateSalaEstado,
   getAsientosBySala,
   hasAsientos,
   generateAsientosForSala

@@ -114,15 +114,23 @@ async function updatePelicula(id, data) {
   return result.rows[0];
 }
 
-async function deletePelicula(id) {
+async function updatePeliculaEstado(id, estado) {
   const result = await query(`
     UPDATE peliculas
-    SET estado = 'INACTIVA'
-    WHERE id = $1
+    SET estado = $1
+    WHERE id = $2
     RETURNING id
-  `, [id]);
+  `, [estado, id]);
   return result.rows[0] || null;
 }
 
-module.exports = { getPeliculas, getPeliculasAdmin, getPeliculaById, getPeliculaActivaVigenteById, createPelicula, updatePelicula, deletePelicula };
+async function deletePelicula(id) {
+  return updatePeliculaEstado(id, 'INACTIVA');
+}
+
+async function activatePelicula(id) {
+  return updatePeliculaEstado(id, 'ACTIVA');
+}
+
+module.exports = { getPeliculas, getPeliculasAdmin, getPeliculaById, getPeliculaActivaVigenteById, createPelicula, updatePelicula, deletePelicula, activatePelicula };
 

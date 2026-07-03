@@ -61,11 +61,17 @@ const content = `
                 <td><strong>${h(pelicula.titulo)}</strong><small>${h((pelicula.sinopsis || '').slice(0, 85))}</small></td>
                 <td>${h(pelicula.genero || 'Sin género')}</td>
                 <td><span class="badge">${h(pelicula.clasificacion || 'S/C')}</span></td>
-                <td><span class="status status-ok">${h(pelicula.estado || 'ACTIVA')}</span></td>
+                <td><span class="status ${pelicula.estado === 'ACTIVA' ? 'status-ok' : 'status-warning'}">${h(pelicula.estado || 'ACTIVA')}</span></td>
                 <td>
-                  <form method="POST" action="/admin/peliculas/${Number(pelicula.id)}/eliminar" data-confirm="¿Eliminar esta película?">
-                    <button class="btn btn-danger btn-small" type="submit">Eliminar</button>
-                  </form>
+                  ${pelicula.estado === 'INACTIVA' ? `
+                    <form method="POST" action="/admin/peliculas/${Number(pelicula.id)}/activar" style="display:inline-block; margin-right:8px;">
+                      <button class="btn btn-secondary btn-small" type="submit">Activar</button>
+                    </form>
+                  ` : `
+                    <form method="POST" action="/admin/peliculas/${Number(pelicula.id)}/eliminar" data-confirm="¿Inactivar esta película?" style="display:inline-block; margin-right:8px;">
+                      <button class="btn btn-danger btn-small" type="submit">Inactivar</button>
+                    </form>
+                  `}
                 </td>
               </tr>
             `).join('')}

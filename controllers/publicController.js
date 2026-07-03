@@ -24,7 +24,7 @@ async function mostrarDetalle(req, res, next) {
   try {
     const pelicula = await peliculaModel.getPeliculaActivaVigenteById(req.params.id);
     if (!pelicula) {
-      return res.status(404).render('error', { title: 'Película no disponible', message: 'La película no se encuentra vigente o no tiene funciones disponibles.', user: req.user || null });
+      return res.status(404).render('error', { title: 'Película no disponible', message: 'La película no se encuentra vigente.', user: req.user || null });
     }
     const funciones = await funcionModel.getFuncionesPorPelicula(req.params.id);
     res.render('detalle-pelicula', { title: 'Detalle', pelicula, funciones, user: req.user || null });
