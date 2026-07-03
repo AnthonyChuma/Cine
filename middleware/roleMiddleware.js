@@ -1,6 +1,9 @@
 function authorizeRoles(...roles) {
   return (req, res, next) => {
     if (!req.user) {
+      if (roles.includes('CLIENTE')) {
+        return res.redirect('/login?error=Debes iniciar sesión para comprar tu ticket.');
+      }
       return res.redirect('/login');
     }
 

@@ -1,0 +1,42 @@
+<%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const money = (value) => Number(value || 0).toFixed(2);
+const content = `
+  <section class="page-heading compact-heading">
+    <span class="eyebrow">Pago</span>
+    <h1>Pago de ticket</h1>
+    <p>Confirma tu pago para completar la compra de tu ticket.</p>
+  </section>
+  <section class="auth-page wide-auth">
+    <div class="auth-card">
+      <div class="ticket-preview">
+        <div><span>Método</span><strong>${h(pago.metodo_pago)}</strong></div>
+        <div><span>Monto</span><strong>Bs ${money(pago.monto)}</strong></div>
+        <div><span>Estado</span><strong>${h(pago.estado)}</strong></div>
+        <div><span>Referencia</span><strong>${h(pago.referencia_pago || 'N/A')}</strong></div>
+      </div>
+
+      ${pago.metodo_pago === 'QR' ? `
+        <div class="info-box">
+          <p>Escanea este QR simulado o copia la referencia de pago para completar la transacción.</p>
+          <div class="ticket-preview" style="grid-template-columns:1fr; gap:14px;">
+            <div style="background:#0f131c; padding:24px; border-radius:18px; text-align:center;">
+              <div style="width:160px; height:160px; margin:0 auto 18px; background:linear-gradient(135deg, rgba(242,194,48,.16), rgba(201,24,43,.16)); display:grid; place-items:center; border-radius:24px;">QR</div>
+              <strong>${h(pago.referencia_pago)}</strong>
+            </div>
+          </div>
+        </div>
+      ` : `
+        <div class="info-box">
+          <p>Se usará el método de tarjeta simulado. No se guardan datos reales.</p>
+        </div>
+      `}
+
+      <form method="POST" action="/pago/${Number(venta.id)}/confirmar" class="form-grid">
+        <button class="btn btn-primary btn-full" type="submit">Confirmar pago</button>
+      </form>
+    </div>
+  </section>
+`;
+%>
+<%- include('layout', { title, user, body: content }) %>

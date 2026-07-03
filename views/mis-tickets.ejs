@@ -15,7 +15,7 @@ const content = `
         <div class="ticket-content">
           <span class="badge">${h(ticket.estado)}</span>
           <h3>${h(ticket.pelicula)}</h3>
-          <p><strong>Código:</strong> ${h(ticket.codigo_unico)}</p>
+          <p><strong>Código:</strong> ${h(ticket.codigo_ticket)}</p>
           <p><strong>Fecha:</strong> ${h(ticket.fecha)} | <strong>Hora:</strong> ${h(ticket.hora_inicio)}</p>
           <p><strong>Asiento:</strong> ${h(ticket.fila)}${h(ticket.numero)}</p>
           <p><strong>Total:</strong> Bs ${money(ticket.total)}</p>

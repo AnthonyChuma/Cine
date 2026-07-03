@@ -1,0 +1,37 @@
+<%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const content = `
+  <section class="page-heading compact-heading">
+    <span class="eyebrow">Administración</span>
+    <h1>Nueva sala</h1>
+    <p>Crea una nueva sala con filas, columnas y capacidad automática.</p>
+  </section>
+  <section class="auth-page wide-auth">
+    <div class="auth-card">
+      <form method="POST" action="/admin/salas" class="form-grid">
+        <label>Nombre de la sala</label>
+        <input name="nombre" placeholder="Sala X" required />
+        <label>Tipo de sala</label>
+        <input name="tipo" placeholder="ESTANDAR" value="ESTANDAR" />
+        <div class="two-cols">
+          <div>
+            <label>Filas</label>
+            <input name="filas" type="number" min="1" placeholder="Ej. 6" required />
+          </div>
+          <div>
+            <label>Columnas</label>
+            <input name="columnas" type="number" min="1" placeholder="Ej. 8" required />
+          </div>
+        </div>
+        <label>Estado</label>
+        <select name="estado">
+          <option selected>ACTIVA</option>
+          <option>INACTIVA</option>
+        </select>
+        <button class="btn btn-primary btn-full" type="submit">Crear sala</button>
+      </form>
+    </div>
+  </section>
+`;
+%>
+<%- include('layout', { title, user, body: content }) %>

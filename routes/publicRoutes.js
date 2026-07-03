@@ -7,5 +7,6 @@ router.get('/cartelera', publicController.cartelera);
 router.get('/pelicula/:id', publicController.mostrarDetalle);
 router.get('/api/public/peliculas', publicController.apiPeliculas);
 router.get('/api/public/funciones', publicController.apiFunciones);
+router.get('/api/funciones/:funcionId/asientos', publicController.apiAsientosPorFuncion);
 
 module.exports = router;

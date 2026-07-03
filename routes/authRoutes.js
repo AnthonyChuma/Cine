@@ -12,7 +12,7 @@ const loginLimiter = rateLimit({
   legacyHeaders: false
 });
 
-router.get('/login', (req, res) => res.render('login', { title: 'Iniciar sesión', error: null, user: req.user || null }));
+router.get('/login', (req, res) => res.render('login', { title: 'Iniciar sesión', error: req.query.error || null, user: req.user || null }));
 router.post('/login', loginLimiter, authController.loginValidators, validateMiddleware, authController.login);
 router.post('/api/auth/login', loginLimiter, authController.loginValidators, validateMiddleware, authController.login);
 router.get('/registro', (req, res) => res.render('registro', { title: 'Registro', error: null, user: req.user || null }));

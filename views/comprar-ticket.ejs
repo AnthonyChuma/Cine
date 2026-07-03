@@ -3,25 +3,56 @@ const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '
 const money = (value) => Number(value || 0).toFixed(2);
 const f = typeof funcion !== 'undefined' ? funcion : null;
 const content = `
-  <section class="auth-page wide-auth">
-    <div class="auth-card">
-      <span class="eyebrow">Compra de ticket</span>
-      <h1>${f ? h(f.pelicula) : 'Función no disponible'}</h1>
-      ${f ? `
-        <div class="ticket-preview">
-          <div><span>Fecha</span><strong>${h(f.fecha)}</strong></div>
-          <div><span>Horario</span><strong>${h(f.hora_inicio)} - ${h(f.hora_fin)}</strong></div>
-          <div><span>Sala</span><strong>${h(f.sala)}</strong></div>
-          <div><span>Precio</span><strong>Bs ${money(f.precio)}</strong></div>
-        </div>
-        <form method="POST" action="/comprar/${Number(f.id)}" class="form-grid">
-          <input type="hidden" name="funcionId" value="${Number(f.id)}" />
-          <label>ID de asiento</label>
-          <input type="number" name="asientoId" min="1" placeholder="Ej. 1" required />
-          <button class="btn btn-primary btn-full" type="submit">Confirmar compra</button>
-        </form>
-      ` : `<p>La función solicitada no existe o ya no está disponible.</p><a class="btn btn-primary" href="/cartelera">Volver a cartelera</a>`}
-    </div>
+  <section class="page-heading compact-heading">
+    <span class="eyebrow">Compra de ticket</span>
+    <h1>${f ? h(f.pelicula) : 'Función no disponible'}</h1>
+    <p>Selecciona tu asiento y forma de pago para completar la compra.</p>
   </section>
-`; %>
+  ${f ? `
+    <section class="section-block">
+      <div class="ticket-preview">
+        <div><span>Fecha</span><strong>${h(f.fecha)}</strong></div>
+        <div><span>Horario</span><strong>${h(f.hora_inicio)} - ${h(f.hora_fin)}</strong></div>
+        <div><span>Sala</span><strong>${h(f.sala)}</strong></div>
+        <div><span>Precio</span><strong>Bs ${money(f.precio)}</strong></div>
+      </div>
+
+      <div class="section-title-row">
+        <div>
+          <span class="eyebrow">Mapa de asientos</span>
+          <h2>Selecciona tu asiento</h2>
+        </div>
+      </div>
+      <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px;">
+        ${asientos.map((asiento) => `
+          <label class="card" style="padding: 18px; text-align:center; cursor:${asiento.ocupado ? 'not-allowed' : 'pointer'}; ${asiento.ocupado ? 'opacity: 0.45; pointer-events:none;' : ''}">
+            <input type="checkbox" name="asientoId" value="${Number(asiento.id)}" style="display:none;" ${asiento.ocupado ? 'disabled' : ''} />
+            <span style="display:block; font-size:1.1rem; font-weight:900; margin-bottom:8px;">${h(asiento.codigo_asiento)}</span>
+            <span style="display:block; color:var(--subtle); margin-bottom:10px;">${asiento.ocupado ? 'Ocupado' : 'Disponible'}</span>
+            <span class="badge">${asiento.ocupado ? 'X' : 'Disponible'}</span>
+          </label>
+        `).join('')}
+      </div>
+
+      <form method="POST" action="/comprar/${Number(f.id)}" class="form-grid" style="margin-top: 24px;">
+        <input type="hidden" name="funcionId" value="${Number(f.id)}" />
+        <label>Forma de pago</label>
+        <select name="metodo_pago" required>
+          <option value="QR">QR</option>
+          <option value="TARJETA">TARJETA</option>
+        </select>
+        <p class="helper">Puedes seleccionar uno o varios asientos disponibles.</p>
+        <button class="btn btn-primary btn-full" type="submit">Pagar y reservar asiento</button>
+      </form>
+    </section>
+  ` : `
+    <section class="empty-state">
+      <span>❌</span>
+      <h3>Función no disponible</h3>
+      <p>La función solicitada no existe o ya no está disponible.</p>
+      <a class="btn btn-primary" href="/cartelera">Volver a cartelera</a>
+    </section>
+  `}
+`;
+ %>
 <%- include('layout', { title, user, body: content }) %>

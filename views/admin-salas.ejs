@@ -1,0 +1,39 @@
+<%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const content = `
+  <section class="page-heading compact-heading">
+    <span class="eyebrow">Administración</span>
+    <h1>Salas</h1>
+    <p>Gestiona salas, filas y columnas para funciones.</p>
+  </section>
+
+  <section class="section-block">
+    <div class="section-title-row">
+      <div>
+        <span class="eyebrow">Salas disponibles</span>
+        <h2>Listado de salas</h2>
+      </div>
+      <a class="btn btn-primary" href="/admin/salas/nueva">Nueva sala</a>
+    </div>
+    <div class="responsive-table">
+      <table>
+        <thead><tr><th>ID</th><th>Nombre</th><th>Filas</th><th>Columnas</th><th>Capacidad</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          ${salas.map((sala) => `
+            <tr>
+              <td>${Number(sala.id)}</td>
+              <td>${h(sala.nombre)}</td>
+              <td>${Number(sala.filas)}</td>
+              <td>${Number(sala.columnas)}</td>
+              <td>${Number(sala.capacidad_total)}</td>
+              <td><span class="status status-ok">${h(sala.estado)}</span></td>
+              <td><a class="btn btn-outline btn-small" href="/admin/salas/${Number(sala.id)}/asientos">Ver asientos</a></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  </section>
+`;
+%>
+<%- include('layout', { title, user, body: content }) %>

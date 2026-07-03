@@ -1,0 +1,48 @@
+<%
+const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const content = `
+  <section class="page-heading compact-heading">
+    <span class="eyebrow">Administración</span>
+    <h1>Asientos de ${h(sala.nombre)}</h1>
+    <p>Visualiza la generación automática de los asientos de esta sala.</p>
+  </section>
+
+  <section class="section-block">
+    <div class="ticket-preview">
+      <div><span>Filas</span><strong>${Number(sala.filas)}</strong></div>
+      <div><span>Columnas</span><strong>${Number(sala.columnas)}</strong></div>
+      <div><span>Capacidad</span><strong>${Number(sala.capacidad_total)}</strong></div>
+      <div><span>Estado</span><strong>${h(sala.estado)}</strong></div>
+    </div>
+
+    <div class="section-title-row">
+      <div>
+        <span class="eyebrow">Asientos</span>
+        <h2>Listado de asientos</h2>
+      </div>
+      <form method="POST" action="/admin/salas/${Number(sala.id)}/asientos/generar">
+        <button class="btn btn-primary" type="submit">Generar asientos</button>
+      </form>
+    </div>
+
+    <div class="responsive-table">
+      <table>
+        <thead><tr><th>Código</th><th>Fila</th><th>Columna</th><th>Estado</th></tr></thead>
+        <tbody>
+          ${asientos.length ? asientos.map((asiento) => `
+            <tr>
+              <td>${h(asiento.codigo_asiento)}</td>
+              <td>${Number(asiento.fila)}</td>
+              <td>${Number(asiento.numero)}</td>
+              <td><span class="status ${asiento.estado === 'DISPONIBLE' ? 'status-ok' : 'status-error'}">${h(asiento.estado)}</span></td>
+            </tr>
+          `).join('') : `
+            <tr><td colspan="4">No hay asientos generados. Presiona Generar asientos.</td></tr>
+          `}
+        </tbody>
+      </table>
+    </div>
+  </section>
+`;
+%>
+<%- include('layout', { title, user, body: content }) %>

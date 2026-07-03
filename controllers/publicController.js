@@ -1,8 +1,14 @@
 const peliculaModel = require('../models/peliculaModel');
 const funcionModel = require('../models/funcionModel');
+const asientoModel = require('../models/asientoModel');
 
-async function home(req, res) {
-  res.render('home', { title: 'Cine Hispano', user: req.user || null });
+async function home(req, res, next) {
+  try {
+    const peliculas = await peliculaModel.getPeliculas();
+    res.render('home', { title: 'Cine Hispano', peliculas, user: req.user || null });
+  } catch (error) {
+    next(error);
+  }
 }
 
 async function cartelera(req, res, next) {
@@ -16,7 +22,10 @@ async function cartelera(req, res, next) {
 
 async function mostrarDetalle(req, res, next) {
   try {
-    const pelicula = await peliculaModel.getPeliculaById(req.params.id);
+    const pelicula = await peliculaModel.getPeliculaActivaVigenteById(req.params.id);
+    if (!pelicula) {
+      return res.status(404).render('error', { title: 'Película no disponible', message: 'La película no se encuentra vigente o no tiene funciones disponibles.', user: req.user || null });
+    }
     const funciones = await funcionModel.getFuncionesPorPelicula(req.params.id);
     res.render('detalle-pelicula', { title: 'Detalle', pelicula, funciones, user: req.user || null });
   } catch (error) {
@@ -42,4 +51,14 @@ async function apiFunciones(req, res, next) {
   }
 }
 
-module.exports = { home, cartelera, mostrarDetalle, apiPeliculas, apiFunciones };
+async function apiAsientosPorFuncion(req, res, next) {
+  try {
+    const { funcionId } = req.params;
+    const asientos = await asientoModel.getAsientosByFuncion(Number(funcionId));
+    res.json(asientos);
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = { home, cartelera, mostrarDetalle, apiPeliculas, apiFunciones, apiAsientosPorFuncion };

@@ -1,11 +1,12 @@
 <%
 const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const lista = Array.isArray(peliculas) ? peliculas : [];
+const salasList = Array.isArray(salas) ? salas : [];
 const content = `
   <section class="page-heading compact-heading">
     <span class="eyebrow">Administración</span>
     <h1>Películas</h1>
-    <p>Gestiona los datos principales de las películas disponibles en cartelera.</p>
+    <p>Gestiona las películas disponibles en cartelera y crea funciones por sala.</p>
   </section>
 
   <section class="admin-grid-layout">
@@ -16,16 +17,30 @@ const content = `
       <label>Sinopsis</label>
       <textarea name="sinopsis" placeholder="Descripción corta"></textarea>
       <div class="two-cols">
-        <div><label>Duración</label><input name="duracion_minutos" type="number" placeholder="Minutos" /></div>
-        <div><label>Clasificación</label><input name="clasificacion" placeholder="ATP, +14" /></div>
+        <div><label>Duración</label><input name="duracion_minutos" type="number" placeholder="Minutos" required /></div>
+        <div><label>Clasificación</label><input name="clasificacion" placeholder="ATP, +14" required /></div>
       </div>
       <label>URL de imagen</label>
       <input name="imagen_url" placeholder="https://..." />
       <label>URL de tráiler</label>
       <input name="trailer_url" placeholder="https://..." />
       <div class="two-cols">
-        <div><label>Estado</label><input name="estado" placeholder="ACTIVA" /></div>
-        <div><label>Estreno</label><input name="fecha_estreno" type="date" /></div>
+        <div><label>Fecha inicio de vigencia</label><input name="fecha_inicio_vigencia" type="date" required /></div>
+        <div><label>Fecha fin de vigencia</label><input name="fecha_fin_vigencia" type="date" /></div>
+      </div>
+      <div class="two-cols">
+        <div>
+          <label>Sala</label>
+          <select name="sala_id" required>
+            <option value="">Selecciona una sala</option>
+            ${salasList.map((sala) => `<option value="${Number(sala.id)}">${h(sala.nombre)} (${Number(sala.capacidad_total)} asientos)</option>`).join('')}
+          </select>
+        </div>
+        <div><label>Precio entrada</label><input name="precio" type="number" step="0.01" placeholder="35.00" required /></div>
+      </div>
+      <div class="two-cols">
+        <div><label>Estado</label><select name="estado"><option selected>ACTIVA</option><option>INACTIVA</option><option>PROXIMAMENTE</option></select></div>
+        <div><label>Promoción</label><input name="promocion" placeholder="Texto promocional" /></div>
       </div>
       <label>ID género</label>
       <input name="genero_id" type="number" placeholder="Ej. 1" />

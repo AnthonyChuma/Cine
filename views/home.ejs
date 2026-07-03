@@ -1,4 +1,10 @@
-<% const content = `
+<% const h = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+const short = (value, size = 120) => {
+  const text = String(value ?? 'Sin sinopsis disponible.');
+  return text.length > size ? `${text.slice(0, size).trim()}...` : text;
+};
+const peliculasList = Array.isArray(peliculas) ? peliculas : [];
+const content = `
   <section class="hero hero-cinema">
     <div class="hero-copy">
       <span class="eyebrow">Cine Hispano Potosí</span>
@@ -19,22 +25,36 @@
     </div>
   </section>
 
-  <section class="feature-grid">
-    <article class="feature-card">
-      <span class="feature-icon">🎞️</span>
-      <h3>Cartelera en vivo</h3>
-      <p>Revisa películas activas, géneros, clasificación y próximos horarios.</p>
-    </article>
-    <article class="feature-card">
-      <span class="feature-icon">🎟️</span>
-      <h3>Compra rápida</h3>
-      <p>Selecciona una función y registra tu ticket en pocos pasos.</p>
-    </article>
-    <article class="feature-card">
-      <span class="feature-icon">📊</span>
-      <h3>Gestión completa</h3>
-      <p>Administra películas, funciones, usuarios y reportes desde un panel central.</p>
-    </article>
+  <section class="page-heading">
+    <span class="eyebrow">Cartelera vigente</span>
+    <h1>Películas en exhibición</h1>
+    <p>Solo se muestran películas activas y con funciones disponibles.</p>
+  </section>
+
+  <section class="movie-grid">
+    ${peliculasList.length ? peliculasList.map((pelicula) => `
+      <article class="movie-card">
+        <div class="movie-poster ${pelicula.imagen_url ? '' : 'poster-empty'}">
+          ${pelicula.imagen_url ? `<img src="${h(pelicula.imagen_url)}" alt="${h(pelicula.titulo)}" loading="lazy" />` : '<span>🎬</span>'}
+          <span class="movie-status">${h(pelicula.estado || 'ACTIVA')}</span>
+        </div>
+        <div class="movie-body">
+          <h3>${h(pelicula.titulo)}</h3>
+          <p>${h(short(pelicula.sinopsis))}</p>
+          <div class="movie-meta">
+            <span>${h(pelicula.genero || 'Sin género')}</span>
+            <span>${h(pelicula.clasificacion || 'S/C')}</span>
+          </div>
+          <a class="btn btn-primary btn-full" href="/pelicula/${Number(pelicula.id)}">Ver funciones</a>
+        </div>
+      </article>
+    `).join('') : `
+      <div class="empty-state">
+        <span>🎬</span>
+        <h3>No hay películas vigentes</h3>
+        <p>Por el momento no hay funciones activas. Vuelve pronto.</p>
+      </div>
+    `}
   </section>
 `; %>
 <%- include('layout', { title, user, body: content }) %>

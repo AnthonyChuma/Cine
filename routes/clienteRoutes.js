@@ -6,6 +6,8 @@ const validateMiddleware = require('../middleware/validateMiddleware');
 
 router.get('/comprar/:funcionId', authorizeRoles('CLIENTE'), clienteController.comprar);
 router.post('/comprar/:funcionId', authorizeRoles('CLIENTE'), clienteController.compraValidators, validateMiddleware, clienteController.procesarCompra);
+router.get('/pago/:ventaId', authorizeRoles('CLIENTE'), clienteController.pagoTicket);
+router.post('/pago/:ventaId/confirmar', authorizeRoles('CLIENTE'), clienteController.confirmarPago);
 router.get('/mis-tickets', authorizeRoles('CLIENTE'), clienteController.misTickets);
 
 module.exports = router;

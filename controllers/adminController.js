@@ -1,6 +1,7 @@
 const peliculaModel = require('../models/peliculaModel');
 const funcionModel = require('../models/funcionModel');
 const reporteModel = require('../models/reporteModel');
+const salaModel = require('../models/salaModel');
 const { query } = require('../models/db');
 
 async function admin(req, res, next) {
@@ -12,10 +13,129 @@ async function admin(req, res, next) {
   }
 }
 
+async function adminSalas(req, res, next) {
+  try {
+    const salas = await salaModel.getSalas();
+    res.render('admin-salas', { title: 'Administrar salas', salas, user: req.user || null });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function nuevaSala(req, res, next) {
+  try {
+    res.render('admin-sala-form', { title: 'Nueva sala', user: req.user || null });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function crearSala(req, res, next) {
+  try {
+    const sala = await salaModel.createSala(req.body);
+    res.redirect(`/admin/salas/${sala.id}/asientos`);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function verAsientosSala(req, res, next) {
+  try {
+    const sala = await salaModel.getSalaById(req.params.id);
+    if (!sala) {
+      return res.status(404).render('error', { title: 'Sala no encontrada', message: 'No existe la sala solicitada.', user: req.user || null });
+    }
+    const asientos = await salaModel.getAsientosBySala(sala.id);
+    res.render('admin-sala-asientos', { title: `Asientos ${sala.nombre}`, sala, asientos, user: req.user || null });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function generarAsientosSala(req, res, next) {
+  try {
+    const sala = await salaModel.getSalaById(req.params.id);
+    if (!sala) {
+      return res.status(404).render('error', { title: 'Sala no encontrada', message: 'No existe la sala solicitada.', user: req.user || null });
+    }
+
+    const hasSeats = await salaModel.hasAsientos(sala.id);
+    if (hasSeats) {
+      return res.status(400).render('error', { title: 'Asientos existentes', message: 'La sala ya tiene asientos generados.', user: req.user || null });
+    }
+
+    await salaModel.generateAsientosForSala(sala.id, sala.filas, sala.columnas);
+    res.redirect(`/admin/salas/${sala.id}/asientos`);
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function adminPeliculas(req, res, next) {
   try {
-    const peliculas = await peliculaModel.getPeliculas();
-    res.render('admin-peliculas', { title: 'Administrar películas', peliculas, user: req.user || null });
+    const peliculas = await peliculaModel.getPeliculasAdmin();
+    const salas = await salaModel.getSalas();
+    res.render('admin-peliculas', { title: 'Administrar películas', peliculas, salas, user: req.user || null });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function nuevaPelicula(req, res, next) {
+  try {
+    const salas = await salaModel.getSalas();
+    res.render('admin-pelicula-form', { title: 'Nueva película', salas, user: req.user || null });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function crearPelicula(req, res, next) {
+  try {
+    const pelicula = await peliculaModel.createPelicula(req.body);
+    if (req.body.sala_id) {
+      await funcionModel.generarFuncionesMensuales({
+        pelicula_id: pelicula.id,
+        sala_id: req.body.sala_id,
+        fecha_inicio_vigencia: req.body.fecha_inicio_vigencia,
+        fecha_fin_vigencia: req.body.fecha_fin_vigencia,
+        precio: req.body.precio
+      });
+    }
+    res.redirect('/admin/peliculas');
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function editarPelicula(req, res, next) {
+  try {
+    await peliculaModel.updatePelicula(req.params.id, req.body);
+    res.redirect('/admin/peliculas');
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function eliminarPelicula(req, res, next) {
+  try {
+    await peliculaModel.deletePelicula(req.params.id);
+    res.redirect('/admin/peliculas');
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function generarFuncionesMensuales(req, res, next) {
+  try {
+    await funcionModel.generarFuncionesMensuales({
+      pelicula_id: req.body.pelicula_id,
+      sala_id: req.body.sala_id,
+      fecha_inicio_vigencia: req.body.fecha_inicio_vigencia,
+      fecha_fin_vigencia: req.body.fecha_fin_vigencia,
+      precio: req.body.precio
+    });
+    res.redirect('/admin/funciones');
   } catch (error) {
     next(error);
   }
@@ -48,28 +168,10 @@ async function adminReportes(req, res, next) {
   }
 }
 
-async function crearPelicula(req, res, next) {
+async function adminReportesPorPelicula(req, res, next) {
   try {
-    await peliculaModel.createPelicula(req.body);
-    res.redirect('/admin/peliculas');
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function editarPelicula(req, res, next) {
-  try {
-    await peliculaModel.updatePelicula(req.params.id, req.body);
-    res.redirect('/admin/peliculas');
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function eliminarPelicula(req, res, next) {
-  try {
-    await peliculaModel.deletePelicula(req.params.id);
-    res.redirect('/admin/peliculas');
+    const peliculas = await reporteModel.getVentasPorPelicula();
+    res.render('admin-reportes', { title: 'Reporte por película', resumen: null, reportes: peliculas, user: req.user || null });
   } catch (error) {
     next(error);
   }
@@ -104,13 +206,21 @@ async function eliminarFuncion(req, res, next) {
 
 module.exports = {
   admin,
+  adminSalas,
+  nuevaSala,
+  crearSala,
+  verAsientosSala,
+  generarAsientosSala,
   adminPeliculas,
-  adminFunciones,
-  adminUsuarios,
-  adminReportes,
+  nuevaPelicula,
   crearPelicula,
   editarPelicula,
   eliminarPelicula,
+  generarFuncionesMensuales,
+  adminFunciones,
+  adminUsuarios,
+  adminReportes,
+  adminReportesPorPelicula,
   crearFuncion,
   editarFuncion,
   eliminarFuncion
